@@ -12,6 +12,7 @@
  */
 package com.sun.jna.platform.win32;
 
+import com.sun.jna.LastErrorException;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
@@ -217,6 +218,15 @@ public interface Kernel32 extends StdCallLibrary, WinNT, Wincon {
      */
     int GetTickCount();
 
+    /**
+     * The GetTickCount64 function retrieves the number of milliseconds that 
+     * have elapsed since the system was started.
+     *
+     * @return Number of milliseconds that have elapsed since the system was
+     *         started.
+     */
+    long GetTickCount64();
+  
     /**
      * The GetCurrentThreadId function retrieves the thread identifier of the
      * calling thread.
@@ -1255,10 +1265,16 @@ public interface Kernel32 extends StdCallLibrary, WinNT, Wincon {
     /**
      * This function returns a handle to an existing process object.
      *
-     * @param fdwAccess
-     *            Not supported; set to zero.
-     * @param fInherit
-     *            Not supported; set to FALSE.
+     * @param fdwAccess The access to the process object. This access right is
+     * checked against the security descriptor for the process. This parameter
+     * can be one or more of the process access rights.
+     * <p>
+     * If the caller has enabled the SeDebugPrivilege privilege, the requested
+     * access is granted regardless of the contents of the security
+     * descriptor.</p>
+     * 
+     * @param fInherit If this value is TRUE, processes created by this process will inherit the handle. Otherwise, the processes do not inherit this handle.
+     * 
      * @param IDProcess
      *            Specifies the process identifier of the process to open.
      * @return An open handle to the specified process indicates success. NULL
@@ -3326,4 +3342,37 @@ public interface Kernel32 extends StdCallLibrary, WinNT, Wincon {
      *         not contain module information.
      */
     boolean Module32NextW(HANDLE hSnapshot, Tlhelp32.MODULEENTRY32W lpme);
+    
+    /**
+     * Controls whether the system will handle the specified types of serious
+     * errors or whether the process will handle them.
+     * @see <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/ms680621(v=vs.85).aspx">MSDN</a>
+     * 
+     * @param umode
+     *            The process error mode.
+     * @return The return value is the previous state of the error-mode bit
+     *         flags.
+     */
+    int SetErrorMode(int umode);
+    
+    /**
+     * Retrieves the address of an exported function or variable from the
+     * specified dynamic-link library (DLL).
+     *
+     * <p>
+     * This function is mapped to enable accessing function on win32 systems
+     * only accessible by their ordinal value.</p>
+     *
+     * <p>
+     * To access functions by their name, please use
+     * NativeLibrary#getFunction.</p>
+     *
+     * @param hmodule A handle to the DLL module that contains the function or
+     *                variable. The LoadLibrary, LoadLibraryEx,
+     *                LoadPackagedLibrary, or GetModuleHandle function returns
+     *                this handle.
+     * @param ordinal ordinal value of the function export
+     * @return address of the exported function
+     */
+    Pointer GetProcAddress(HMODULE hmodule, int ordinal) throws LastErrorException;
 }

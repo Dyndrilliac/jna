@@ -18,7 +18,7 @@
 #include "ffi.h"
 #include "com_sun_jna_Function.h"
 #include "com_sun_jna_Native.h"
-#if defined(__sun__) || defined(_AIX)
+#if defined(__sun__) || defined(_AIX) || defined(__linux__)
 #  include <alloca.h>
 #endif
 #ifdef _WIN32
@@ -36,6 +36,9 @@
 #define GET_LAST_ERROR() GetLastError()
 #define SET_LAST_ERROR(CODE) SetLastError(CODE)
 #else
+#ifndef _XOPEN_SOURCE /* AIX power-aix 1 7 00F84C0C4C00 defins 700 */
+#define _XOPEN_SOURCE 600
+#endif
 #define GET_LAST_ERROR() errno
 #define SET_LAST_ERROR(CODE) (errno = (CODE))
 #endif /* _WIN32 */
@@ -143,7 +146,7 @@ typedef struct _callback {
 
 #if defined(_MSC_VER)
 #include "snprintf.h"
-#define strdup _strdup
+#define STRDUP _strdup
 #if defined(_WIN64)
 #define L2A(X) ((void *)(X))
 #define A2L(X) ((jlong)(X))
@@ -151,6 +154,9 @@ typedef struct _callback {
 #define L2A(X) ((void *)(unsigned long)(X))
 #define A2L(X) ((jlong)(unsigned long)(X))
 #endif
+#else
+#include <stdio.h>
+#define STRDUP strdup
 #endif
 
 /* Convenience macros */

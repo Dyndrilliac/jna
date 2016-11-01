@@ -68,11 +68,11 @@
   <property name="jna.version" value="${jna.major}.${jna.minor}.${jna.revision}${version.suffix}"/>
   <!-- jnidispatch library release version -->
   <property name="jni.major" value="5"/>
-  <property name="jni.minor" value="0"/>
+  <property name="jni.minor" value="1"/>
   <property name="jni.revision" value="0"/>
   <property name="jni.build" value="0"/> <!--${build.number}-->
   <property name="jni.version" value="${jni.major}.${jni.minor}.${jni.revision}"/>
-  <property name="jni.md5" value="4f72f2799dfee6008a386bc40afd7428"/>
+  <property name="jni.md5" value="74e8f8e397c43487738c5c1f1363498b"/>
   <property name="spec.title" value="Java Native Access (JNA)"/>
   <property name="spec.vendor" value="${vendor}"/>
   <property name="spec.version" value="${jna.major}"/>
@@ -120,10 +120,10 @@
   <property name="pom-platform" value="pom-jna-platform.xml" />
 
   <!-- defined maven snapshots and staging repository id and url -->
-  <property name="maven-snapshots-repository-id" value="snapshots.java.net" />
-  <property name="maven-snapshots-repository-url" value="https://maven.java.net/content/repositories/snapshots/" />
-  <property name="maven-staging-repository-id" value="staging.java.net" />
-  <property name="maven-staging-repository-url" value="https://maven.java.net/service/local/staging/deploy/maven2/" />
+  <property name="maven-snapshots-repository-id" value="oss.sonatype.org" />
+  <property name="maven-snapshots-repository-url" value="https://oss.sonatype.org/content/repositories/snapshots/" />
+  <property name="maven-staging-repository-id" value="oss.sonatype.org" />
+  <property name="maven-staging-repository-url" value="https://oss.sonatype.org/service/local/staging/deploy/maven2/" />
 
   <!-- Miscellaneous -->
   <property name="build.compiler.emacs" value="true"/>
@@ -1001,6 +1001,7 @@ osname=macosx;processor=x86;processor=x86-64;processor=ppc
       <syspropertyset refid="headless"/>
       <!-- avoid VM conflicts with JNA protected mode -->
       <env key="${ld.preload.name}" file="${libjsig}"/>
+      <env key="LC_MESSAGES" value="C" />
       <sysproperty key="jna.library.path" file="${build.native}"/>
       <!-- Ignore any system install of JNA -->
       <sysproperty key="jna.nosys" value="true"/>
@@ -1143,7 +1144,7 @@ osname=macosx;processor=x86;processor=x86-64;processor=ppc
     <!-- Javadoc -->
     <!-- JNA sources only, for use in Linux build from source/shared libffi -->
     <zip zipfile="${dist}/src.zip">
-      <zipfileset dir="." includes="build.xml,${pom},LICENSE,LGPL2.1,ASL2.0"/>
+      <zipfileset dir="." includes="build.xml,${pom},LICENSE,LGPL2.1,AL2.0"/>
       <zipfileset dir="${src}" includes="**/*.java" prefix="src"/>
       <zipfileset dir="${test.src}" includes="**/*.java" prefix="test"/>
       <zipfileset dir="${native}" excludes="libffi,libffi/**/*,build,build/**/*" prefix="native"/>
@@ -1174,6 +1175,24 @@ osname=macosx;processor=x86;processor=x86-64;processor=ppc
     <subant target="clean" failonerror="true">
       <fileset dir="${contrib}" includes="*/build.xml"/>
     </subant>
+  </target>
+
+  <target name="install" depends="dist" description="Install jna and jna-platform artifacts into local maven repository">
+    <artifact:mvn failonerror="true">
+      <arg value="org.apache.maven.plugins:maven-install-plugin:2.5:install-file"/>
+      <arg value="-DpomFile=${pom}"/>
+      <arg value="-Dfile=${dist-jar}"/>
+      <arg value="-Dsources=${maven-sources-jar}"/>
+      <arg value="-Djavadoc=${maven-javadoc-jar}"/>
+    </artifact:mvn>
+
+    <artifact:mvn failonerror="true">
+      <arg value="org.apache.maven.plugins:maven-install-plugin:2.5:install-file"/>
+      <arg value="-DpomFile=${pom-platform}"/>
+      <arg value="-Dfile=${platform-jar}"/>
+      <arg value="-Dsources=${platform-sources-jar}"/>
+      <arg value="-Djavadoc=${platform-javadoc-jar}"/>
+    </artifact:mvn>
   </target>
 
 
